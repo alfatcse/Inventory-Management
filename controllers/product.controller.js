@@ -5,13 +5,26 @@ const {
   updateProductService,
   bulkUpdateProductService,
   deleteProductByIdService,
-  bulkDeleteProductService
+  bulkDeleteProductService,
 } = require("../Services/product.service");
 exports.getProducts = async (req, res, next) => {
   try {
-    console.log(req.query.limit);
-    const limit = req.query.limit;
-    const a = await getProductsService(limit);
+    console.log(req.query);
+    const filter={...req.query};
+    const excludeFields=['sort','page','limit'];
+    excludeFields.map(field=>delete filter[field]);
+    const queries={};
+    if(req.query.sort){
+      const sortBy=req.query.sort.split(',').join(' ');
+      queries.sortBy=sortBy;
+      console.log(sortBy);
+    }
+    if(req.query.fields){
+      const fields=req.query.fields.split(',').join(' ');
+      queries.fields=fields;
+      console.log(fields);
+    }
+    const a = await getProductsService(filter,queries);
     res.status(200).json({
       status: "success",
       data: a,
@@ -77,7 +90,7 @@ exports.bulkUpdateProduct = async (req, res, next) => {
 };
 exports.deleteProductById = async (req, res, next) => {
   try {
-    const {id}=req.params;
+    const { id } = req.params;
     const productUpdate = await deleteProductByIdService(id);
     res.status(200).json({
       status: "success",
@@ -94,14 +107,14 @@ exports.deleteProductById = async (req, res, next) => {
 };
 exports.deleteProductByIdBulk = async (req, res, next) => {
   try {
-    const {ids}=req.body;
+    const { ids } = req.body;
     console.log(ids);
     const productDelete = await bulkDeleteProductService(ids);
-    if(!productDelete.deletedCount){
+    if (!productDelete.deletedCount) {
       return res.status(400).json({
-        status:'fail',
-        error:"Can not delete"
-      })
+        status: "fail",
+        error: "Can not delete",
+      });
     }
     res.status(200).json({
       status: "success",
