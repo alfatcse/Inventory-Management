@@ -1,8 +1,13 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
 const { ObjectId } = mongoose.Schema.Types;
-const productSchema = mongoose.Schema(
+const stockSchema = mongoose.Schema(
   {
+    productId: {
+      type: ObjectId,
+      required: true,
+      ref: "Product",
+    },
     name: {
       type: String,
       required: [true, "Please Provide a Name"],
@@ -36,20 +41,38 @@ const productSchema = mongoose.Schema(
         },
       },
     ],
+    price: {
+      type: Number,
+      required: true,
+      min: [0, "Product price can not be negative"],
+    },
+    quantity: {
+      type: Number,
+      required: true,
+      min: [0, "Product quantity can not be negative"],
+    },
     category: {
       type: String,
       required: true,
     },
-    brand:{
-      name:{
-        type:String,
-        required:true,
+    status: {
+      type: String,
+      required: true,
+      enum: {
+        values: ["in-stock", "out-of-stock", "discontinued"],
+        message: "status can not be {VALUE}",
       },
-      id:{
-        type:ObjectId,
-        ref:"Brand",
-        required:true
-      }
+    },
+    brand: {
+      name: {
+        type: String,
+        required: true,
+      },
+      id: {
+        type: ObjectId,
+        ref: "Brand",
+        required: true,
+      },
     },
     // price: {
     //   type: Number,
@@ -63,6 +86,34 @@ const productSchema = mongoose.Schema(
         values: ["kg", "pcs", "litre", "bag"],
         message: "Unit value must be kg/pcs/litre/bag",
       },
+    },
+    store: {
+      name: {
+        type: String,
+        trim: true,
+        required: [true, "Please provide a Store name"],
+        lowercase: true,
+        enum: {
+          values: ["Dhaka", "Chittogram", "Khulna"],
+          message: "{VALUE} is not a valid name",
+        },
+      },
+      id: {
+        type: ObjectId,
+        required: true,
+        ref: "Store",
+      },
+    },
+    suppliedBy: {
+      name: {
+        type: String,
+        trim: true,
+        required: [true, "Please provide a Supplier name"],
+      },
+      id:{
+        type:ObjectId,
+        ref:'Supplier'
+      }
     },
     // quantity: {
     //   type: Number,
@@ -104,5 +155,5 @@ const productSchema = mongoose.Schema(
     timestamps: true,
   }
 );
-const Product = mongoose.model("Product", productSchema);
-module.exports = Product;
+const Stock = mongoose.model("Product", stockSchema);
+module.exports = Stock;
