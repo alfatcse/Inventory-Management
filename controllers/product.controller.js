@@ -10,21 +10,36 @@ const {
 exports.getProducts = async (req, res, next) => {
   try {
     console.log(req.query);
-    const filter={...req.query};
-    const excludeFields=['sort','page','limit'];
-    excludeFields.map(field=>delete filter[field]);
-    const queries={};
-    if(req.query.sort){
-      const sortBy=req.query.sort.split(',').join(' ');
-      queries.sortBy=sortBy;
-      console.log(sortBy);
+    const queries = {};
+    const filter = { ...req.query };
+    // let filterString = JSON.stringify(filter.price);
+    // filterString = filterString.replace(
+    //   /\b(gt|gte|lt|lte)\b/g,
+    //   (match) => `$${match}`
+    // );
+    // queries.greterFilter = JSON.parse(filterString);
+    //  console.log("ger", queries);
+    const excludeFields = ["sort", "page", "limit"];
+    excludeFields.map((field) => delete filter[field]);
+    if (req.query.sort) {
+      const sortBy = req.query.sort.split(",").join(" ");
+      queries.sortBy = sortBy;
+      // console.log(sortBy);
     }
-    if(req.query.fields){
-      const fields=req.query.fields.split(',').join(' ');
-      queries.fields=fields;
-      console.log(fields);
+    if (req.query.fields) {
+      const fields = req.query.fields.split(",").join(" ");
+      queries.fields = fields;
+      // console.log(fields);
     }
-    const a = await getProductsService(filter,queries);
+    if(req.query.page)
+    {
+      const {page=0,limit=2}=req.query;
+      const skip=(page-1)*parseInt( limit);
+      queries.skip=skip;
+      queries.limit=parseInt(limit);
+    }
+    console.log(queries);
+    const a = await getProductsService(filter, queries);
     res.status(200).json({
       status: "success",
       data: a,
