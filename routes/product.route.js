@@ -1,11 +1,9 @@
 const express = require('express');
 const router=express.Router();
-const multer=require("multer");
 const productController=require('../controllers/product.controller');
+const uploader=require('../middleware/Uploader');
 
-const uploader=multer({dest:"images/"});
-
-router.route("/file-upload")
+router.post("/file-upload",uploader.array("image"),productController.fileUpload);//for single file -> uploader.single
 
 router.route('/bulk-update').patch(productController.bulkUpdateProduct)
 router.route('/bulk-delete').delete(productController.deleteProductByIdBulk)
